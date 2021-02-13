@@ -70,7 +70,7 @@
 // @section info
 
 // Author info of this build printed to the host during boot and M115
-#define STRING_CONFIG_H_AUTHOR "(none, default config)" // Who made the changes.
+#define STRING_CONFIG_H_AUTHOR "(Kayurov Pavel, Laser)" // Who made the changes.
 //#define CUSTOM_VERSION_FILE Version.h // Path from the root directory (no quotes)
 
 /**
@@ -128,7 +128,7 @@
 
 // Choose the name from boards.h that matches your setup
 #ifndef MOTHERBOARD
-  #define MOTHERBOARD BOARD_RAMPS_14_EFB
+  #define MOTHERBOARD BOARD_MEGACONTROLLER
 #endif
 
 // Name displayed in the LCD "Ready" message and Info menu
@@ -2301,6 +2301,16 @@
 #if EITHER(ANYCUBIC_LCD_I3MEGA, ANYCUBIC_LCD_CHIRON)
   #define LCD_SERIAL_PORT 3  // Default is 3 for Anycubic
   //#define ANYCUBIC_LCD_DEBUG
+#endif
+
+//
+// Custom LCD for Laser
+//
+#define CUSTOM_LASER_LCD
+#if ENABLED(CUSTOM_LASER_LCD)
+  #define LCD_SERIAL_PORT 2
+  #define LCD_BAUDRATE BAUDRATE
+  #define EXTENSIBLE_UI
 #endif
 
 //
