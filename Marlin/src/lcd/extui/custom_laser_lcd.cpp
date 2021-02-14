@@ -77,7 +77,8 @@ void write_to_lcd(const char * const message)
 }
 
 // {E:<msg>} is for error states.
-void set_lcd_error_P(PGM_P const error, PGM_P const component=nullptr) {
+void set_lcd_error_P(PGM_P const error, PGM_P const component=nullptr) 
+{
   write_to_lcd_P(PSTR("{E:"));
   write_to_lcd_P(error);
   if (component) {
@@ -101,7 +102,8 @@ void set_lcd_error_P(PGM_P const error, PGM_P const component=nullptr) {
  *
  * the command portion begins after the :
  */
-void process_lcd_c_command(const char* command) {
+void process_lcd_c_command(const char* command) 
+{
   const int target_val = command[1] ? atoi(command + 1) : -1;
   if (target_val < 0) {
     DEBUG_ECHOLNPAIR("UNKNOWN C COMMAND ", command);
@@ -136,7 +138,8 @@ void process_lcd_c_command(const char* command) {
  * time remaining (HH:MM:SS). The UI can't handle displaying a second hotend,
  * but the stock firmware always sends it, and it's always zero.
  */
-void process_lcd_eb_command(const char* command) {
+void process_lcd_eb_command(const char* command) 
+{
   char elapsed_buffer[10];
   static uint8_t iteration = 0;
   duration_t elapsed;
@@ -186,13 +189,16 @@ void process_lcd_eb_command(const char* command) {
  * X, Y, Z, A (extruder)
  */
 template<typename T>
-void j_move_axis(const char* command, const T axis) {
+void j_move_axis(const char* command, const T axis) 
+{
   const float dist = atof(command + 1) / 10.0;
   ExtUI::setAxisPosition_mm(ExtUI::getAxisPosition_mm(axis) + dist, axis);
 };
 
-void process_lcd_j_command(const char* command) {
-  switch (command[0]) {
+void process_lcd_j_command(const char* command) 
+{
+  switch (command[0]) 
+  {
     case 'E': break;
     case 'A': j_move_axis<ExtUI::extruder_t>(command, ExtUI::extruder_t::E0); break;
     case 'Y': j_move_axis<ExtUI::axis_t>(command, ExtUI::axis_t::Y); break;
@@ -224,9 +230,11 @@ void process_lcd_j_command(const char* command) {
  * T:-2537.4 E:0
  * Note only the curly brace stuff matters.
  */
-void process_lcd_p_command(const char* command) {
+void process_lcd_p_command(const char* command) 
+{
 
-  switch (command[0]) {
+  switch (command[0]) 
+  {
     case 'P':
         ExtUI::pausePrint();
         write_to_lcd_P(PSTR("{SYS:PAUSED}"));
@@ -284,9 +292,12 @@ void process_lcd_p_command(const char* command) {
  * {FILE:fcupdate.flg}
  * {SYS:OK}
  */
-void process_lcd_s_command(const char* command) {
-  switch (command[0]) {
-    case 'I': {
+void process_lcd_s_command(const char* command) 
+{
+  switch (command[0]) 
+  {
+    case 'I': 
+    {
       // temperature information
       char message_buffer[MAX_CURLY_COMMAND];
       sprintf_P(message_buffer, PSTR("{T0:%03i/%03i}{T1:000/000}{TP:%03i/%03i}"),
@@ -300,7 +311,8 @@ void process_lcd_s_command(const char* command) {
       write_to_lcd(message_buffer);
     } break;
 
-    case 'L': {
+    case 'L': 
+    {
       #if ENABLED(SDSUPPORT)
         if (!card.isMounted()) card.mount();
 
@@ -331,12 +343,13 @@ void process_lcd_s_command(const char* command) {
  * Currently {E:0} is not handled. Its function is unknown,
  * but it occurs during the temp window after a sys build.
  */
-void process_lcd_command(const char* command) {
+void process_lcd_command(const char* command) 
+{
   const char *current = command;
 
   byte command_code = *current++;
-  if (*current == ':') {
-
+  if (*current == ':') 
+  {
     current++; // skip the :
 
     switch (command_code) {
@@ -356,7 +369,8 @@ void process_lcd_command(const char* command) {
 //
 // Parse LCD commands mixed with G-Code
 //
-void parse_lcd_byte(const byte b) {
+void parse_lcd_byte(const byte b) 
+{
   static char inbound_buffer[MAX_CURLY_COMMAND];
 
   static uint8_t parsing = 0;                   // Parsing state
@@ -364,7 +378,8 @@ void parse_lcd_byte(const byte b) {
 
   const char c = b & 0x7F;
 
-  if (parsing) {
+  if (parsing) 
+  {
     const bool is_lcd = parsing == 1;           // 1 for LCD
     if ( ( is_lcd && c == '}')                  // Closing brace on LCD command
       || (!is_lcd && c == '\n')                 // LF on a G-code command
@@ -380,7 +395,8 @@ void parse_lcd_byte(const byte b) {
     else if (inbound_count < MAX_CURLY_COMMAND - 2)
       inbound_buffer[inbound_count++] = is_lcd ? c : b; // Buffer while space remains
   }
-  else {
+  else 
+  {
          if (c == '{')            parsing = 1;  // Brace opens an LCD command
     else if (prevcr && c == '\n') parsing = 2;  // CRLF indicates G-code
     prevcr = (c == '\r');                       // Remember if it was a CR
@@ -392,46 +408,42 @@ void parse_lcd_byte(const byte b) {
  * UD means disconnected
  * The stock firmware considers USB initialized as "connected."
  */
-void update_usb_status(const bool forceUpdate) {
+void update_usb_status(const bool forceUpdate) 
+{
   static bool last_usb_connected_status = false;
   // This is mildly different than stock, which
   // appears to use the usb discovery status.
   // This is more logical.
-  if (last_usb_connected_status != MYSERIAL0.connected() || forceUpdate) {
+  if (last_usb_connected_status != MYSERIAL0.connected() || forceUpdate) 
+  {
     last_usb_connected_status = MYSERIAL0.connected();
     write_to_lcd_P(last_usb_connected_status ? PSTR("{R:UC}\r\n") : PSTR("{R:UD}\r\n"));
   }
 }
 
-namespace ExtUI {
-  void onStartup() {
-    /**
-     * The Malyan LCD actually runs as a separate MCU on Serial 1.
-     * This code's job is to siphon the weird curly-brace commands from
-     * it and translate into ExtUI operations where possible.
-     */
+namespace ExtUI 
+{
+
+  void onStartup() 
+  {
     inbound_count = 0;
 
     #ifndef LCD_BAUDRATE
       #define LCD_BAUDRATE 500000
     #endif
+
     LCD_SERIAL.begin(LCD_BAUDRATE);
 
     // Signal init
     write_to_lcd_P(PSTR("{SYS:STARTED}\r\n"));
-
-    // send a version that says "unsupported"
-    write_to_lcd_P(PSTR("{VER:99}\r\n"));
-
-    // No idea why it does this twice.
-    write_to_lcd_P(PSTR("{SYS:STARTED}\r\n"));
     update_usb_status(true);
   }
 
-  void onIdle() {
+  void onIdle() 
+  {
     /**
      * - from printer on startup:
-     * {SYS:STARTED}{VER:29}{SYS:STARTED}{R:UD}
+     * {SYS:STARTED}{R:UD}
      */
 
     // First report USB status.
@@ -461,30 +473,32 @@ namespace ExtUI {
     #endif
   }
 
-  void onPrinterKilled(PGM_P const error, PGM_P const component) {
+  void onPrinterKilled(PGM_P const error, PGM_P const component) 
+  {
     set_lcd_error_P(error, component);
   }
 
   #if HAS_PID_HEATING
 
-    void onPidTuning(const result_t rst) {
-      // Called for temperature PID tuning result
-      //SERIAL_ECHOLNPAIR("OnPidTuning:", rst);
-      switch (rst) {
-        case PID_BAD_EXTRUDER_NUM:
-          set_lcd_error_P(GET_TEXT(MSG_PID_BAD_EXTRUDER_NUM));
-          break;
-        case PID_TEMP_TOO_HIGH:
-          set_lcd_error_P(GET_TEXT(MSG_PID_TEMP_TOO_HIGH));
-          break;
-        case PID_TUNING_TIMEOUT:
-          set_lcd_error_P(GET_TEXT(MSG_PID_TIMEOUT));
-          break;
-        case PID_DONE:
-          set_lcd_error_P(GET_TEXT(MSG_PID_AUTOTUNE_DONE));
-          break;
-      }
+  void onPidTuning(const result_t rst) 
+  {
+    // Called for temperature PID tuning result
+    //SERIAL_ECHOLNPAIR("OnPidTuning:", rst);
+    switch (rst) {
+      case PID_BAD_EXTRUDER_NUM:
+        set_lcd_error_P(GET_TEXT(MSG_PID_BAD_EXTRUDER_NUM));
+        break;
+      case PID_TEMP_TOO_HIGH:
+        set_lcd_error_P(GET_TEXT(MSG_PID_TEMP_TOO_HIGH));
+        break;
+      case PID_TUNING_TIMEOUT:
+        set_lcd_error_P(GET_TEXT(MSG_PID_TIMEOUT));
+        break;
+      case PID_DONE:
+        set_lcd_error_P(GET_TEXT(MSG_PID_AUTOTUNE_DONE));
+        break;
     }
+  }
 
   #endif
 
@@ -521,6 +535,7 @@ namespace ExtUI {
 
   void onSteppersDisabled() {}
   void onSteppersEnabled()  {}
+
 }
 
-#endif // MALYAN_LCD
+#endif // CUSTOM_LASER_LCD
