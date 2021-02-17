@@ -159,6 +159,8 @@
 
 #endif // MINIPANEL
 
+#define SD_DETECT_PIN                       49
+
 //
 // M3/M4/M5 - Spindle/Laser Control
 //

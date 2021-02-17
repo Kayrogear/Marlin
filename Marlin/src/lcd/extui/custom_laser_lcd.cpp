@@ -508,9 +508,9 @@ namespace ExtUI
 
   // Not needed for Malyan LCD
   void onStatusChanged(const char * const) {}
-  void onMediaInserted() {}
-  void onMediaError() {}
-  void onMediaRemoved() {}
+  void onMediaInserted() { write_to_lcd_P(PSTR("{SYS:MEDIA_INSERT}")); }
+  void onMediaError() { write_to_lcd_P(PSTR("{SYS:MEDIA_ERROR}")); }
+  void onMediaRemoved() { write_to_lcd_P(PSTR("{SYS:MEDIA_REMOVED}")); }
   void onPlayTone(const uint16_t, const uint16_t) {}
   void onFilamentRunout(const extruder_t extruder) {}
   void onUserConfirmRequired(const char * const) {}
